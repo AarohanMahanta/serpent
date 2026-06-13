@@ -2,6 +2,7 @@ class VirtualMachine:
     
     def __init__(self):
         self.stack = []
+        self.variables = {}
 
     def run(self, code):
         instructions = list(code.co_code)
@@ -21,5 +22,6 @@ class VirtualMachine:
                 self.stack.pop()
             elif opcode == 83:  # RETURN_VALUE
                 return self.stack.pop()
+            elif opcode == 90:  # BINARY_ADD
             else:
                 raise NotImplementedError(f"Opcode {opcode} not implemented")
