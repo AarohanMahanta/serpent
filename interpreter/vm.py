@@ -10,12 +10,15 @@ class VirtualMachine:
         i = 0
         while i < len(instructions):
             opcode = instructions[i]
-            i += 1
+            arg = instructions[i + 1]
+            i += 2
 
             if opcode == 100:  # LOAD_CONST
-                const_index = instructions[i]
-                i += 1
-                self.stack.append(constants[const_index])
+                self.stack.append(constants[arg])
+            elif opcode == 116:  # LOAD_GLOBAL
+                self.stack.append(print)  # For simplicity, we only support the print function
+            elif opcode == 1:  # POP_TOP
+                self.stack.pop()
             elif opcode == 83:  # RETURN_VALUE
                 return self.stack.pop()
             else:
