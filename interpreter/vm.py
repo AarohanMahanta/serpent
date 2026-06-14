@@ -61,3 +61,8 @@ class VirtualMachine:
         func = self.stack.pop()
         result = func(*args)
         self.stack.append(result)
+
+    def op_BINARY_ADD(self, code, arg):
+        right = self.stack.pop()
+        left = self.stack.pop()
+        self.stack.append(left + right)
