@@ -66,3 +66,28 @@ class VirtualMachine:
         right = self.stack.pop()
         left = self.stack.pop()
         self.stack.append(left + right)
+
+    def op_BINARY_SUBTRACT(self, code, arg):
+        right = self.stack.pop()
+        left = self.stack.pop()
+        self.stack.append(left - right)
+
+    def op_BINARY_MULTIPLY(self, code, arg):
+        right = self.stack.pop()
+        left = self.stack.pop()
+        self.stack.append(left * right)
+
+    def op_BINARY_TRUE_DIVIDE(self, code, arg):
+        right = self.stack.pop()
+        left = self.stack.pop()
+        self.stack.append(left / right)
+
+    def op_BINARY_MODULO(self, code, arg):
+        right = self.stack.pop()
+        left = self.stack.pop()
+        self.stack.append(left % right)
+
+    def op_BINARY_POWER(self, code, arg):
+        right = self.stack.pop()
+        left = self.stack.pop()
+        self.stack.append(left ** right)
