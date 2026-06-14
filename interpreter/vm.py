@@ -6,13 +6,11 @@ class VirtualMachine:
 
     def run(self, code):
         instructions = list(code.co_code)
-        constants = code.co_consts
-
-        i = 0
-        while i < len(instructions):
-            opcode = instructions[i]
-            arg = instructions[i + 1]
-            i += 2
+        self.i = 0
+        while self.i < len(instructions):
+            opcode = instructions[self.i]
+            arg = instructions[self.i + 1]
+            self.i += 2
 
             # look up method by opcode name instead of elif chain
             import dis
@@ -91,3 +89,34 @@ class VirtualMachine:
         right = self.stack.pop()
         left = self.stack.pop()
         self.stack.append(left ** right)
+
+    def op_COMPARE_OP(self, code, arg):
+        import dis
+        ops = {
+            '<':  lambda a, b: a < b,
+            '<=': lambda a, b: a <= b,
+            '==': lambda a, b: a == b,
+            '!=': lambda a, b: a != b,
+            '>':  lambda a, b: a > b,
+            '>=': lambda a, b: a >= b,
+        }
+        right = self.stack.pop()
+        left = self.stack.pop()
+        op = dis.cmp_op[arg]
+        self.stack.append(ops[op](left, right))
+
+    def op_POP_JUMP_IF_FALSE(self, code, arg):
+        val = self.stack.pop()
+        if not val:
+            self.i = arg 
+
+    def op_POP_JUMP_IF_TRUE(self, code, arg):
+        val = self.stack.pop()
+        if val:
+            self.i = arg
+
+    def op_JUMP_FORWARD(self, code, arg):
+        self.i += arg     
+
+    def op_JUMP_ABSOLUTE(self, code, arg):
+        self.i = arg        
