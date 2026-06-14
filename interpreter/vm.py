@@ -14,14 +14,50 @@ class VirtualMachine:
             arg = instructions[i + 1]
             i += 2
 
-            if opcode == 100:  # LOAD_CONST
-                self.stack.append(constants[arg])
-            elif opcode == 116:  # LOAD_GLOBAL
-                self.stack.append(print)  # For simplicity, we only support the print function
-            elif opcode == 1:  # POP_TOP
-                self.stack.pop()
-            elif opcode == 83:  # RETURN_VALUE
-                return self.stack.pop()
-            elif opcode == 90:  # BINARY_ADD
-            else:
-                raise NotImplementedError(f"Opcode {opcode} not implemented")
+            # look up method by opcode name instead of elif chain
+            import dis
+            opcode_name = dis.opname[opcode]
+            method = getattr(self, f"op_{opcode_name}", None)
+
+            if method is None:
+                raise NotImplementedError(f"Opcode {opcode_name} not implemented")
+            
+            method(code, arg)
+
+    def op_LOAD_CONST(self, code, arg):
+        self.stack.append(code.co_consts[arg])
+
+    def op_STORE_NAME(self, code, arg):
+        name = code.co_names[arg]
+        self.variables[name] = self.stack.pop()
+
+    def op_LOAD_NAME(self, code, arg):
+        import builtins
+        name = code.co_names[arg]
+        if name in self.variables:
+            self.stack.append(self.variables[name])
+        elif hasattr(builtins, name):
+            self.stack.append(getattr(builtins, name))
+        else:
+            raise NameError(f"name '{name}' is not defined")
+
+    def op_LOAD_GLOBAL(self, code, arg):
+        name = code.co_names[arg]
+        # check builtins like print, len etc
+        import builtins
+        self.stack.append(getattr(builtins, name))
+
+    def op_POP_TOP(self, code, arg):
+        self.stack.pop()
+
+    def op_RETURN_VALUE(self, code, arg):
+        return self.stack.pop() if self.stack else None
+
+    def op_CALL_FUNCTION(self, code, arg):
+        # arg = number of arguments
+        args = []
+        for _ in range(arg):
+            args.insert(0, self.stack.pop())
+        func = self.stack.pop()
+        result = func(*args)
+        self.stack.append(result)
