@@ -1,3 +1,6 @@
+from ast import arg
+
+
 class VirtualMachine:
     
     def __init__(self):
@@ -120,3 +123,9 @@ class VirtualMachine:
 
     def op_JUMP_ABSOLUTE(self, code, arg):
         self.i = arg        
+
+    def op_GET_ITER(self, code, arg):
+        obj = self.stack.pop()
+        self.stack.append(iter(obj))
+
+         
