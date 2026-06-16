@@ -128,4 +128,11 @@ class VirtualMachine:
         obj = self.stack.pop()
         self.stack.append(iter(obj))
 
-         
+    def op_FOR_ITER(self, code, arg):
+        iterator = self.stack[-1] 
+        try:
+            value = next(iterator)
+            self.stack.append(value)
+        except StopIteration:
+            self.stack.pop()        
+            self.i += arg      
