@@ -106,3 +106,11 @@ serpent/
 ```
 
 ---
+
+## What's next
+
+Layer 2 builds a Tensor class with automatic differentiation, which is the foundation needed to define and train neural networks from scratch, without PyTorch or NumPy.
+
+---
+
+*Built as a ground-up reimplementation of the Python + ML infrastructure stack.*
