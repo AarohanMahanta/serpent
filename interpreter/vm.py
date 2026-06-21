@@ -84,7 +84,9 @@ class VirtualMachine:
 
     def op_LOAD_GLOBAL(self, frame, arg):
         name = frame.code.co_names[arg]
-        if hasattr(builtins, name):
+        if name in self.variables:
+            frame.stack.append(self.variables[name])
+        elif hasattr(builtins, name):
             frame.stack.append(getattr(builtins, name))
         else:
             raise NameError(f"global name '{name}' is not defined")
