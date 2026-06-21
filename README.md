@@ -1,6 +1,7 @@
 # Serpent
 
-A Python execution engine built from scratch — starting as a bytecode interpreter and growing into a tensor engine, computation graph optimizer, and neural network compiler.
+A Python execution engine built from scratch. 
+Starting as a bytecode interpreter and growing into a tensor engine, computation graph optimizer, and neural network compiler.
 
 ---
 
