@@ -1,4 +1,4 @@
-# Serpent
+# Serpent - ML Compiler
 
 A Python execution engine built from scratch. 
 Starting as a bytecode interpreter and growing into a tensor engine, computation graph optimizer, and neural network compiler.
