@@ -38,3 +38,15 @@ class Tensor:
         self.grad = 1.0
         for node in reversed(topo):
             node._backward()
+
+    def __mul__(self, other):
+        out = Tensor(self.data * other.data)
+        out._prev = {self, other}
+        out._op = 'mul'
+
+        def _backward():
+            self.grad += other.data * out.grad
+            other.grad += self.data * out.grad
+
+        out._backward = _backward
+        return out
