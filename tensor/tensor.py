@@ -70,3 +70,14 @@ class Tensor:
     
     def __truediv__(self, other):
         return self * other ** -1
+    
+    def relu(self):
+        out = Tensor(max(0, self.data))
+        out._prev = {self}
+        out._op = 'relu'
+
+        def _backward():
+            self.grad += (out.data > 0) * out.grad
+
+        out._backward = _backward
+        return out
