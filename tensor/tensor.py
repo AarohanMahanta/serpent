@@ -65,4 +65,5 @@ class Tensor:
     def __neg__(self):
         return self * Tensor(-1.0)
     
-    
+    def __sub__(self, other):
+        return self + (-other)
