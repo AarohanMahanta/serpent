@@ -62,4 +62,7 @@ class Tensor:
         out._backward = _backward
         return out
     
+    def __neg__(self):
+        return self * Tensor(-1.0)
+    
     
