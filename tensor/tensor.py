@@ -67,3 +67,6 @@ class Tensor:
     
     def __sub__(self, other):
         return self + (-other)
+    
+    def __truediv__(self, other):
+        return self * other ** -1
