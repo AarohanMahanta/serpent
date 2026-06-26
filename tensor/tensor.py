@@ -50,3 +50,16 @@ class Tensor:
 
         out._backward = _backward
         return out
+    
+    def __pow__(self, power):
+        out = Tensor(self.data ** power)
+        out._prev = {self}
+        out._op = 'pow'
+
+        def _backward():
+            self.grad += (power * self.data ** (power - 1)) * out.grad
+
+        out._backward = _backward
+        return out
+    
+    
