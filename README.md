@@ -1,6 +1,5 @@
-# Serpent - ML Compiler
-
-A Python execution engine built from scratch. 
+# Serpent - ML Compiler & Runtime
+A Python execution engine built from scratch.
 Starting as a bytecode interpreter and growing into a tensor engine, computation graph optimizer, and neural network compiler.
 
 ---
@@ -9,7 +8,7 @@ Starting as a bytecode interpreter and growing into a tensor engine, computation
 
 ```
 Layer 1: Bytecode Interpreter    ← complete
-Layer 2: Tensor Engine           ← coming soon
+Layer 2: Tensor Engine           ← complete
 Layer 3: Computation Graph       ← coming soon
 Layer 4: Graph Optimizer         ← coming soon
 Layer 5: C Codegen               ← coming soon
@@ -69,7 +68,6 @@ for i in range(10):
 
 ```bash
 python3 run.py hello.py
-
 0
 1
 1
@@ -87,7 +85,7 @@ python3 run.py hello.py
 The VM uses a dynamic dispatch pattern instead of a giant if/elif chain. Each opcode maps directly to a method:
 
 ```python
-opcode_name = dis.opname[opcode]          # 100 -> "LOAD_CONST"
+opcode_name = dis.opname[opcode]            # 100 -> "LOAD_CONST"
 method = getattr(self, f"op_{opcode_name}") # finds op_LOAD_CONST
 method(frame, arg)                          # executes it
 ```
@@ -107,9 +105,59 @@ serpent/
 
 ---
 
+## Layer 2 — Tensor Engine
+
+A scalar-valued automatic differentiation engine built from scratch. Every operation on a Tensor records how to compute its gradient, so calling `backward()` on any output automatically propagates gradients back through the entire computation — no PyTorch, no NumPy.
+
+### How it works
+
+```
+forward pass:   x → [*] → [+] → [relu] → output
+                    records _backward at each step
+
+backward pass:  x ← [*] ← [+] ← [relu] ← output.grad = 1.0
+                    chains _backward functions in reverse
+```
+
+### What's implemented
+
+- `Tensor` class with `data` and `grad`
+- Operations with automatic gradient tracking: `+`, `-`, `*`, `/`, `**`
+- ReLU activation function
+- `backward()` — topological sort of the computation graph, reverse-mode autodiff
+
+### Example
+
+```python
+from tensor.tensor import Tensor
+
+# one neuron: output = relu(x*w + b)
+x = Tensor(2.0)
+w = Tensor(3.0)
+b = Tensor(1.0)
+
+output = (x * w + b).relu()
+output.backward()
+
+print('output:', output.data)  # 7.0
+print('x.grad:', x.grad)       # 3.0
+print('w.grad:', w.grad)       # 2.0
+print('b.grad:', b.grad)       # 1.0
+```
+
+### File structure
+
+```
+serpent/
+├── tensor/
+│   └── tensor.py   — Tensor class with autograd
+```
+
+---
+
 ## What's next
 
-Layer 2 builds a Tensor class with automatic differentiation, which is the foundation needed to define and train neural networks from scratch, without PyTorch or NumPy.
+Layer 3 builds a computation graph on top of the tensor engine, capturing neural network operations as a graph of nodes and edges, which enables the optimizer in Layer 4 to fuse and eliminate operations before codegen.
 
 ---
 
