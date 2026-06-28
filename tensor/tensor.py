@@ -93,3 +93,6 @@ class Neuron:
     def __call__(self, x):
         weighted_sum = sum((w * x_i for w, x_i in zip(self.weights, x)), self.bias) 
         return weighted_sum.relu()
+    
+    def parameters(self):
+        return self.weights + [self.bias]
