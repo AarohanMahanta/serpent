@@ -85,4 +85,7 @@ class Tensor:
         return out
 
     
-    
+class Neuron:
+    def __init__(self, n_inputs):
+        self.weights = [Tensor(random.uniform(-1, 1)) for _ in range(n_inputs)]
+        self.bias = Tensor(0.0)
