@@ -1,3 +1,5 @@
+import random
+
 class Tensor:
     
     def __init__(self, data):
@@ -81,4 +83,6 @@ class Tensor:
 
         out._backward = _backward
         return out
+
+    
     
