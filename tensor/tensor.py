@@ -96,3 +96,7 @@ class Neuron:
     
     def parameters(self):
         return self.weights + [self.bias]
+    
+class Layer:
+    def __init__(self, n_inputs, n_neurons):
+        self.neurons = [Neuron(n_inputs) for _ in range(n_neurons)]
