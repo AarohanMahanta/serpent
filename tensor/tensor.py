@@ -100,3 +100,8 @@ class Neuron:
 class Layer:
     def __init__(self, n_inputs, n_neurons):
         self.neurons = [Neuron(n_inputs) for _ in range(n_neurons)]
+    
+    def __call__(self, x):
+        return [neuron(x) for neuron in self.neurons]
+    
+    
