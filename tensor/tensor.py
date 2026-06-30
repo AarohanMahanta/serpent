@@ -106,3 +106,10 @@ class Layer:
     
     def parameters(self):
         return [param for neuron in self.neurons for param in neuron.parameters()]  
+    
+class MLP:
+    def __init__(self, n_inputs, layer_sizes):
+        sizes = [n_inputs] + layer_sizes
+        self.layers = [Layer(sizes[i], sizes[i+1]) for i in range(len(layer_sizes))]
+
+    
