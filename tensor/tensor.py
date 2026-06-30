@@ -112,4 +112,7 @@ class MLP:
         sizes = [n_inputs] + layer_sizes
         self.layers = [Layer(sizes[i], sizes[i+1]) for i in range(len(layer_sizes))]
 
-    
+    def __call__(self, x):
+        for layer in self.layers:
+            x = layer(x)
+        return x[0] if len(x) == 1 else x
