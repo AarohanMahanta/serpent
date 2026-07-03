@@ -1,4 +1,5 @@
 import random
+import math
 
 class Tensor:
     
@@ -73,13 +74,14 @@ class Tensor:
     def __truediv__(self, other):
         return self * other ** -1
     
-    def relu(self):
-        out = Tensor(max(0, self.data))
+    def tanh(self):
+        t = math.tanh(self.data)
+        out = Tensor(t)
         out._prev = {self}
-        out._op = 'relu'
+        out._op = 'tanh'
 
         def _backward():
-            self.grad += (out.data > 0) * out.grad
+            self.grad += (1 - t**2) * out.grad
 
         out._backward = _backward
         return out
@@ -87,15 +89,15 @@ class Tensor:
     
 class Neuron:
     def __init__(self, n_inputs):
-        self.weights = [Tensor(random.uniform(-1, 1)) for _ in range(n_inputs)]
-        self.bias = Tensor(0.0)
+        self.w = [Tensor(random.uniform(-1, 1)) for _ in range(n_inputs)]
+        self.b = Tensor(0.0)
 
     def __call__(self, x):
-        weighted_sum = sum((w * x_i for w, x_i in zip(self.weights, x)), self.bias) 
-        return weighted_sum.relu()
-    
+        out = sum((wi * xi for wi, xi in zip(self.w, x)), self.b)
+        return out.tanh()
+
     def parameters(self):
-        return self.weights + [self.bias]
+        return self.w + [self.b]
     
 class Layer:
     def __init__(self, n_inputs, n_neurons):
