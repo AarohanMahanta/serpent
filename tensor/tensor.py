@@ -116,3 +116,6 @@ class MLP:
         for layer in self.layers:
             x = layer(x)
         return x[0] if len(x) == 1 else x
+    
+    def parameters(self):
+        return [param for layer in self.layers for param in layer.parameters()]
