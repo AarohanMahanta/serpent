@@ -112,10 +112,10 @@ A scalar-valued automatic differentiation engine built from scratch. Every opera
 ### How it works
 
 ```
-forward pass:   x → [*] → [+] → [relu] → output
+forward pass:   x → [*] → [+] → [tanh] → output
                     records _backward at each step
 
-backward pass:  x ← [*] ← [+] ← [relu] ← output.grad = 1.0
+backward pass:  x ← [*] ← [+] ← [tanh] ← output.grad = 1.0
                     chains _backward functions in reverse
 ```
 
@@ -123,26 +123,48 @@ backward pass:  x ← [*] ← [+] ← [relu] ← output.grad = 1.0
 
 - `Tensor` class with `data` and `grad`
 - Operations with automatic gradient tracking: `+`, `-`, `*`, `/`, `**`
-- ReLU activation function
+- Activation functions: ReLU, tanh
 - `backward()` — topological sort of the computation graph, reverse-mode autodiff
+- `Neuron`, `Layer`, `MLP` classes for building neural networks
+- Training loop with gradient descent
 
 ### Example
 
 ```python
-from tensor.tensor import Tensor
+from tensor.tensor import Tensor, MLP
 
-# one neuron: output = relu(x*w + b)
-x = Tensor(2.0)
-w = Tensor(3.0)
-b = Tensor(1.0)
+model = MLP(3, [4, 4, 1])
 
-output = (x * w + b).relu()
-output.backward()
+xs = [
+    [Tensor(2.0),  Tensor(3.0),  Tensor(-1.0)],
+    [Tensor(3.0),  Tensor(-1.0), Tensor(0.5)],
+    [Tensor(0.5),  Tensor(1.0),  Tensor(1.0)],
+    [Tensor(1.0),  Tensor(1.0),  Tensor(-1.0)],
+]
+ys = [Tensor(1.0), Tensor(-1.0), Tensor(-1.0), Tensor(1.0)]
 
-print('output:', output.data)  # 7.0
-print('x.grad:', x.grad)       # 3.0
-print('w.grad:', w.grad)       # 2.0
-print('b.grad:', b.grad)       # 1.0
+for step in range(50):
+    preds = [model(x) for x in xs]
+    loss = sum(((p - y) ** 2 for p, y in zip(preds, ys)), Tensor(0.0))
+    for p in model.parameters():
+        p.grad = 0.0
+    loss.backward()
+    for p in model.parameters():
+        p.data -= 0.05 * p.grad
+```
+
+```
+step 0:  loss = 5.2788
+step 10: loss = 0.3966
+step 20: loss = 0.1106
+step 30: loss = 0.0577
+step 40: loss = 0.0377
+
+final predictions:
+  target:   1.0  predicted: 0.9461
+  target:  -1.0  predicted: -0.9023
+  target:  -1.0  predicted: -0.9274
+  target:   1.0  predicted: 0.9014
 ```
 
 ### File structure
@@ -150,7 +172,8 @@ print('b.grad:', b.grad)       # 1.0
 ```
 serpent/
 ├── tensor/
-│   └── tensor.py   — Tensor class with autograd
+│   └── tensor.py   — Tensor, Neuron, Layer, MLP classes
+└── train.py        — training loop
 ```
 
 ---
