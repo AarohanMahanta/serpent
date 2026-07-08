@@ -7,3 +7,10 @@ class Node:
 
     def __repr__(self):
         return f"Node(op={self.op}, data={self.data}, grad={self.grad})"
+
+
+class Graph:
+    def __init__(self, output):
+        self.nodes = {}
+        self.edges = []
+        self._build(output)
