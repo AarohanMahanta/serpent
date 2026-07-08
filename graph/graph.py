@@ -14,3 +14,11 @@ class Graph:
         self.nodes = {}
         self.edges = []
         self._build(output)
+
+    def _build(self, tensor):
+        if id(tensor) in self.nodes:
+            return
+        self.nodes[id(tensor)] = Node(tensor)
+        for child in tensor._prev:
+            self._build(child)
+            self.edges.append((id(child), id(tensor)))
