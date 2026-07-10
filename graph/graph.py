@@ -22,3 +22,12 @@ class Graph:
         for child in tensor._prev:
             self._build(child)
             self.edges.append((id(child), id(tensor)))
+    def print(self):
+        print(f"Graph: {len(self.nodes)} nodes, {len(self.edges)} edges\n")
+        for node_id, node in self.nodes.items():
+            print(f"  {node}")
+        print()
+        for src, dst in self.edges:
+            src_node = self.nodes[src]
+            dst_node = self.nodes[dst]
+            print(f"  {src_node.op} → {dst_node.op}")
