@@ -9,7 +9,7 @@ Starting as a bytecode interpreter and growing into a tensor engine, computation
 ```
 Layer 1: Bytecode Interpreter    ← complete
 Layer 2: Tensor Engine           ← complete
-Layer 3: Computation Graph       ← coming soon
+Layer 3: Computation Graph       ← complete
 Layer 4: Graph Optimizer         ← coming soon
 Layer 5: C Codegen               ← coming soon
 Layer 6: JIT Compilation         ← coming soon
@@ -178,9 +178,58 @@ serpent/
 
 ---
 
+## Layer 3 — Computation Graph
+
+Makes the implicit graph built by the tensor engine explicit and inspectable. Walks backwards through tensor connections to build a structured node/edge graph that can be printed, traversed, and handed to the optimizer.
+
+### What's implemented
+
+- `Node` class — wraps each tensor with its op, data, and grad
+- `Graph` class — walks `_prev` links to build node/edge lists
+- `topo_sort()` — returns nodes in execution order, inputs first
+
+### Example
+
+```python
+from tensor.tensor import Tensor
+from graph.graph import Graph
+
+x = Tensor(2.0)
+w = Tensor(3.0)
+b = Tensor(1.0)
+output = (x * w + b).tanh()
+
+g = Graph(output)
+g.print()
+```
+
+```
+Graph: 6 nodes, 5 edges
+
+  Node(op=input, data=2.0,  grad=0.0)
+  Node(op=input, data=3.0,  grad=0.0)
+  Node(op=mul,   data=6.0,  grad=0.0)
+  Node(op=input, data=1.0,  grad=0.0)
+  Node(op=add,   data=7.0,  grad=0.0)
+  Node(op=tanh,  data=1.0,  grad=0.0)
+
+Execution order:
+  input → mul → add → tanh
+```
+
+### File structure
+
+```
+serpent/
+├── graph/
+│   └── graph.py    — Node, Graph, topo_sort
+```
+
+---
+
 ## What's next
 
-Layer 3 builds a computation graph on top of the tensor engine, capturing neural network operations as a graph of nodes and edges, which enables the optimizer in Layer 4 to fuse and eliminate operations before codegen.
+Layer 4 adds an optimizer that walks the computation graph and applies transformations — constant folding, dead node elimination, and operator fusion — before handing the optimized graph to the C codegen in Layer 5.
 
 ---
 
