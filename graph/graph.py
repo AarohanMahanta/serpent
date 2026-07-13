@@ -31,3 +31,10 @@ class Graph:
             src_node = self.nodes[src]
             dst_node = self.nodes[dst]
             print(f"  {src_node.op} → {dst_node.op}")
+
+    def topo_sort(self):
+        visited = set()
+        order = []
+
+        
+    
