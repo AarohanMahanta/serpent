@@ -36,5 +36,17 @@ class Graph:
         visited = set()
         order = []
 
-        
+        def visit(node_id):
+            if node_id in visited:
+                return
+            visited.add(node_id)
+            for src, dst in self.edges:
+                if dst == node_id:
+                    visit(src)
+            order.append(self.nodes[node_id])
+
+        for node_id in self.nodes:
+            visit(node_id)
+
+        return order
     
