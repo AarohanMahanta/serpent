@@ -42,8 +42,10 @@ class Optimizer:
     def optimize(self):
         folded = self.constant_fold()
         eliminated = self.dead_node_elimination()
-        print(f"[optimizer] constant folding: {folded} nodes folded")
-        print(f"[optimizer] dead node elimination: {eliminated} nodes removed")
+        fused = self.operator_fusion()
+        print(f"[optimizer] constant folding:       {folded} nodes folded")
+        print(f"[optimizer] dead node elimination:  {eliminated} nodes removed")
+        print(f"[optimizer] operator fusion:        {fused} ops fused")
         return self.graph
 
     def operator_fusion(self):
