@@ -45,4 +45,22 @@ class Optimizer:
         print(f"[optimizer] constant folding: {folded} nodes folded")
         print(f"[optimizer] dead node elimination: {eliminated} nodes removed")
         return self.graph
+
+    def operator_fusion(self):
+        fused = 0
+        fuseable = {('mul', 'add'), ('add', 'tanh'), ('mul', 'tanh')}
+
+        for src_id, dst_id in list(self.graph.edges):
+            src = self.graph.nodes.get(src_id)
+            dst = self.graph.nodes.get(dst_id)
+            if src and dst and (src.op, dst.op) in fuseable:
+                dst.op = f"fused_{src.op}_{dst.op}"
+                src.op = 'eliminated'
+                fused += 1
+
+        self.graph.nodes = {
+            k: v for k, v in self.graph.nodes.items()
+            if v.op != 'eliminated'
+        }
+        return fused
     
