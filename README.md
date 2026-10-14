@@ -10,7 +10,7 @@ Starting as a bytecode interpreter and growing into a tensor engine, computation
 Layer 1: Bytecode Interpreter    ← complete
 Layer 2: Tensor Engine           ← complete
 Layer 3: Computation Graph       ← complete
-Layer 4: Graph Optimizer         ← coming soon
+Layer 4: Graph Optimizer         ← complete
 Layer 5: C Codegen               ← coming soon
 Layer 6: JIT Compilation         ← coming soon
 ```
@@ -90,8 +90,6 @@ method = getattr(self, f"op_{opcode_name}") # finds op_LOAD_CONST
 method(frame, arg)                          # executes it
 ```
 
-Adding a new opcode is just adding a new method. Same architecture used by CPython (`ceval.c`) and the Byterun project.
-
 ### File structure
 
 ```
@@ -134,23 +132,7 @@ backward pass:  x ← [*] ← [+] ← [tanh] ← output.grad = 1.0
 from tensor.tensor import Tensor, MLP
 
 model = MLP(3, [4, 4, 1])
-
-xs = [
-    [Tensor(2.0),  Tensor(3.0),  Tensor(-1.0)],
-    [Tensor(3.0),  Tensor(-1.0), Tensor(0.5)],
-    [Tensor(0.5),  Tensor(1.0),  Tensor(1.0)],
-    [Tensor(1.0),  Tensor(1.0),  Tensor(-1.0)],
-]
-ys = [Tensor(1.0), Tensor(-1.0), Tensor(-1.0), Tensor(1.0)]
-
-for step in range(50):
-    preds = [model(x) for x in xs]
-    loss = sum(((p - y) ** 2 for p, y in zip(preds, ys)), Tensor(0.0))
-    for p in model.parameters():
-        p.grad = 0.0
-    loss.backward()
-    for p in model.parameters():
-        p.data -= 0.05 * p.grad
+# ... training loop ...
 ```
 
 ```
@@ -227,9 +209,59 @@ serpent/
 
 ---
 
+## Layer 4 — Graph Optimizer
+
+Walks the computation graph and applies optimization passes before codegen. Each pass reduces the number of operations the compiled code needs to execute.
+
+### What's implemented
+
+- **Constant folding** — if all inputs to a node are constants, precompute the result at compile time
+- **Dead node elimination** — remove nodes whose output is never used
+- **Operator fusion** — merge consecutive ops into a single fused kernel (`mul+add`, `add+tanh`, `mul+tanh`)
+
+### Example
+
+```python
+from tensor.tensor import Tensor
+from graph.graph import Graph
+from graph.optimizer import Optimizer
+
+x = Tensor(2.0)
+w = Tensor(3.0)
+b = Tensor(1.0)
+output = (x * w + b).tanh()
+
+g = Graph(output)
+print('Before:', len(g.nodes), 'nodes')
+
+opt = Optimizer(g)
+opt.optimize()
+
+print('After:', len(g.nodes), 'nodes')
+```
+
+```
+Before: 6 nodes
+[optimizer] constant folding:       1 nodes folded
+[optimizer] dead node elimination:  0 nodes removed
+[optimizer] operator fusion:        1 ops fused
+After: 5 nodes
+```
+
+### File structure
+
+```
+serpent/
+├── graph/
+│   ├── graph.py        — Node, Graph, topo_sort
+│   └── optimizer.py    — Optimizer with folding, elimination, fusion
+```
+
+---
+
 ## What's next
 
-Layer 4 adds an optimizer that walks the computation graph and applies transformations — constant folding, dead node elimination, and operator fusion — before handing the optimized graph to the C codegen in Layer 5.
+Layer 5 walks the optimized graph in topological order and emits a C function for each node. The generated C code is compiled with gcc and benchmarked against the Python version to measure speedup.
 
 ---
 
